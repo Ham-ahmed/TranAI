@@ -1,108 +1,113 @@
 #!/bin/sh
 
-# Configuration
-#########################################
-plugin="TranslatorProAI"
-git_url="https://raw.githubusercontent.com/Ham-ahmed/TranAI/refs/heads/main/TranslatorProAI-v3.0"
-version=$(wget $git_url/version -qO- | awk 'NR==1')
-plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/TranslatorProAI-v3.0"
-package="enigma2-plugin-extensions-$plugin"
-targz_file="$plugin.tar.gz"
-url="$git_url/$targz_file"
-temp_dir="/tmp"
+# color
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+NC='\033[0m' # No Color
 
-# Determine package manager
-#########################################
-if command -v dpkg >/dev/null 2>&1; then
-    package_manager="apt"
-    status_file="/var/lib/dpkg/status"
-    uninstall_command="apt-get purge --auto-remove -y"
-else
-    package_manager="opkg"
-    status_file="/var/lib/opkg/status"
-    uninstall_command="opkg remove --force-depends"
-fi
-
-# Check and remove package old version
-#########################################
-check_and_remove_package() {
-    if [ -d "$plugin_path" ]; then
-        echo "> removing package old version please wait..."
-        sleep 3
-        
-        # Remove plugin directory
-        rm -rf "$plugin_path" > /dev/null 2>&1
-        
-        # Remove package if exists in status file
-        if grep -q "$package" "$status_file" 2>/dev/null; then
-            echo "> Removing existing $package package, please wait..."
-            $uninstall_command "$package" > /dev/null 2>&1
-        fi
-        
-        echo "*******************************************"
-        echo "*             Removed Finished            *"
-        echo "*******************************************"
-        sleep 3
-    else 
-        echo "> No existing installation found"
-    fi
-}
-
-# Download & install package
-#########################################
-download_and_install_package() {
-    echo "> Downloading $plugin-$version package please wait ..."
-    sleep 3
-    
-    # Download the tar.gz file
-    if wget --show-progress -qO "$temp_dir/$targz_file" --no-check-certificate "$url"; then
-        # Extract to root directory
-        if tar -xzf "$temp_dir/$targz_file" -C / > /dev/null 2>&1; then
-            echo "> $plugin-$version package installed successfully"
-        else
-            echo "> Extraction failed for $plugin-$version package"
-            rm -rf "$temp_dir/$targz_file" >/dev/null 2>&1
-            sleep 3
-            exit 1
-        fi
-        
-        # Clean up
-        rm -rf "$temp_dir/$targz_file" >/dev/null 2>&1
-        sleep 3
-    else
-        echo "> Download failed for $plugin-$version package"
-        rm -rf "$temp_dir/$targz_file" >/dev/null 2>&1
-        sleep 3
-        exit 1
-    fi
-}
+# Show title
+echo -e "${CYAN}"
+echo "#########################################################"
+echo "#          TranslatorProAI Installation Script          #"
+echo "#                   Version 3.0                        #"
+echo "#########################################################"
+echo -e "${NC}"
+sleep 2s
 
 # Remove unnecessary files and folders
-#########################################
-cleanup() {
-    # Remove common control files
-    rm -rf /CONTROL >/dev/null 2>&1
-    rm -f /control /postinst /preinst /prerm /postrm >/dev/null 2>&1
-    rm -f /tmp/*.ipk /tmp/*.tar.gz >/dev/null 2>&1
+echo -e "${YELLOW}> Removing unnecessary files and folders...${NC}"
+sleep 2s
+
+if [ -d "/CONTROL" ]; then
+    rm -r /CONTROL >/dev/null 2>&1
+    echo -e "${GREEN}✓ Removed /CONTROL directory${NC}"
+fi
+
+directories="/control /postinst /preinst /prerm /postrm"
+for dir in $directories; do
+    if [ -d "$dir" ] || [ -f "$dir" ]; then
+        rm -rf "$dir" >/dev/null 2>&1
+        echo -e "${GREEN}✓ Removed $dir${NC}"
+    fi
+done
+
+# Clean temporary files
+echo -e "${YELLOW}> Cleaning temporary files...${NC}"
+rm -rf /tmp/*.ipk >/dev/null 2>&1
+rm -rf /tmp/*.tar.gz >/dev/null 2>&1
+echo -e "${GREEN}✓ Temporary files cleaned${NC}"
+
+# Settings
+plugin=TranslatorProAI
+version=3.0
+url=https://raw.githubusercontent.com/Ham-ahmed/TranAI/refs/heads/main/TranslatorProAI-v3.0.tar.gz
+package=/var/volatile/tmp/$plugin-$version.tar.gz
+
+# Download and install
+echo ""
+echo -e "${BLUE}> Downloading $plugin-$version package please wait...${NC}"
+sleep 3s
+
+# Progress bar during download
+echo -e "${CYAN}"
+wget --show-progress -qO $package --no-check-certificate $url
+echo -e "${NC}"
+
+# Check if the download was successful
+if [ ! -f "$package" ]; then
+    echo -e "${RED}❌ Download failed!${NC}"
+    echo -e "${RED}> $plugin-$version package download failed${NC}"
+    sleep 3s
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Download completed successfully${NC}"
+echo -e "${YELLOW}> Extracting package...${NC}"
+
+# Extract files
+tar -xzf $package -C /
+extract=$?
+rm -rf $package >/dev/null 2>&1
+
+echo ""
+if [ $extract -eq 0 ]; then
+    echo -e "${GREEN}"
+    echo "#########################################################"
+    echo "#              INSTALLED SUCCESSFULLY                   #"
+    echo "#              ON - MagicPanelGold v9.0                 #"
+    echo "#           Enigma2 restart is required                 #"
+    echo "#        .::UPLOADED BY  >>>>   HAMDY_AHMED::.          #"
+    echo "#     https://www.facebook.com/share/g/18qCRuHz26/      #"
+    echo "#########################################################"
+    echo -e "${YELLOW}"
+    echo "#########################################################"
+    echo "#           your Device will RESTART Now                #"
+    echo "#########################################################"
+    echo -e "${NC}"
+    sleep 3s
     
-    # Print completion message
-    echo "> [$(date +'%Y-%m-%d')] Installation completed for $plugin"
-}
+    # إRestart (you can unsuspend if you want to restart automatically)
+    # echo -e "${RED}> Restarting device...${NC}"
+    # sleep 2s
+    # reboot
+    
+else
+    echo -e "${RED}"
+    echo "#########################################################"
+    echo "#                 INSTALLATION FAILED                  #"
+    echo "#########################################################"
+    echo -e "${NC}"
+    echo -e "${RED}> $plugin-$version package installation failed${NC}"
+    sleep 3s
+fi
 
-# Main execution
-#########################################
-echo "*******************************************"
-echo "*     Starting $plugin installation     *"
-echo "*******************************************"
-
-# Run functions
-check_and_remove_package
-download_and_install_package
-cleanup
-
-echo "*******************************************"
-echo "*        Installation Finished            *"
-echo "*******************************************"
-sleep 2
-
-exit 0
+# Closing message
+echo ""
+echo -e "${CYAN}#######################################${NC}"
+echo -e "${WHITE}Script execution completed${NC}"
+echo -e "${CYAN}#######################################${NC}"
