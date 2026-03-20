@@ -10,6 +10,26 @@ CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
+# Function to print colored messages
+print_message() {
+    color=$1
+    message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+# Function to restart Enigma2
+restart_enigma2() {
+    if command -v wert-sie >/dev/null 2>&1; then
+        wert-sie
+    elif command -v init >/dev/null 2>&1; then
+        init 4
+        sleep 1
+        init 3
+    else
+        killall -9 enigma2
+    fi
+}
+
 # Show title
 echo -e "${CYAN}"
 echo "#########################################################"
@@ -69,21 +89,28 @@ fi
 echo -e "${GREEN}✓ Download completed successfully${NC}"
 echo -e "${YELLOW}> Extracting package...${NC}"
 
-# Extract files
-tar -xzf $package -C /
-extract=$?
-rm -rf $package >/dev/null 2>&1
+# Extract package
+tar -xzf $package -C / >/dev/null 2>&1
 
-echo ""
-if [ $extract -eq 0 ]; then
-    echo -e "${GREEN}"
-    echo "#########################################################"
-    echo "#              INSTALLED SUCCESSFULLY                   #"
-    echo "#              ON - MagicPanelGold v9.0                 #"
-    echo "#           Enigma2 restart is required                 #"
-    echo "#        .::UPLOADED BY  >>>>   HAMDY_AHMED::.          #"
-    echo "#     https://www.facebook.com/share/g/18qCRuHz26/      #"
-    echo "#########################################################"
+# Check if extraction was successful
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓ Package extracted successfully${NC}"
+    echo -e "${YELLOW}> Installing...${NC}"
+    sleep 2s
+    
+    # Run postinst script if exists
+    if [ -f "/postinst" ]; then
+        chmod 755 /postinst
+        /postinst >/dev/null 2>&1
+        rm -f /postinst
+    fi
+    
+    # Clean up
+    rm -rf /CONTROL /control /postinst /preinst /prerm /postrm >/dev/null 2>&1
+    rm -f $package
+    
+    echo -e "${GREEN}✓ Installation completed successfully${NC}"
+    
     echo -e "${YELLOW}"
     echo "#########################################################"
     echo "#           your Device will RESTART Now                #"
@@ -91,7 +118,7 @@ if [ $extract -eq 0 ]; then
     echo -e "${NC}"
     sleep 3s
     
-    # إRestart (you can unsuspend if you want to restart automatically)
+    # Restart (you can uncomment if you want to restart automatically)
     # echo -e "${RED}> Restarting device...${NC}"
     # sleep 2s
     # reboot
@@ -104,6 +131,7 @@ else
     echo -e "${NC}"
     echo -e "${RED}> $plugin-$version package installation failed${NC}"
     sleep 3s
+    exit 1
 fi
 
 # Success message
