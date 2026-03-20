@@ -106,8 +106,31 @@ else
     sleep 3s
 fi
 
-# Closing message
+# Success message
 echo ""
-echo -e "${CYAN}#######################################${NC}"
-echo -e "${WHITE}Script execution completed${NC}"
-echo -e "${CYAN}#######################################${NC}"
+print_message $CYAN "==================================================================="
+print_message $GREEN "===             Installation Successful!                       ==="
+printf "${YELLOW}===             TranslatorProAI v%-24s===${NC}\n" "$version"
+print_message $BLUE "===              Downloaded by  >>>>   HAMDY_AHMED              ==="
+print_message $CYAN "==================================================================="
+echo ""
+print_message $YELLOW "Enigma2 will restart automatically after 5 seconds..."
+print_message $BLUE "Press Ctrl+C to cancel"
+echo ""
+
+# Countdown before restart
+for i in {3..1}; do
+    printf "${YELLOW}Restarting in $i seconds...${NC}\r"
+    sleep 1
+done
+echo ""
+
+# Automatic restart
+print_message $GREEN "========================================================="
+print_message $YELLOW "===            Restarting Enigma2                     ==="
+print_message $GREEN "========================================================="
+
+# Call restart function
+restart_enigma2
+
+exit 0
