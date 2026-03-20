@@ -5,7 +5,7 @@
 plugin="TranslatorProAI"
 git_url="https://raw.githubusercontent.com/Ham-ahmed/TranAI/refs/heads/main/TranslatorProAI-v3.0"
 version=$(wget $git_url/version -qO- | awk 'NR==1')
-plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/TranslatorProAI"
+plugin_path="/usr/lib/enigma2/python/Plugins/Extensions/TranslatorProAI-v3.0"
 package="enigma2-plugin-extensions-$plugin"
 targz_file="$plugin.tar.gz"
 url="$git_url/$targz_file"
