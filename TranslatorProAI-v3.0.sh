@@ -114,16 +114,6 @@ printf "${YELLOW}===             TranslatorProAI v%-24s===${NC}\n" "$version"
 print_message $BLUE "===              Downloaded by  >>>>   HAMDY_AHMED              ==="
 print_message $CYAN "==================================================================="
 echo ""
-print_message $YELLOW "Enigma2 will restart automatically after 5 seconds..."
-print_message $BLUE "Press Ctrl+C to cancel"
-echo ""
-
-# Countdown before restart
-for i in {3..1}; do
-    printf "${YELLOW}Restarting in $i seconds...${NC}\r"
-    sleep 1
-done
-echo ""
 
 # Automatic restart
 print_message $GREEN "========================================================="
